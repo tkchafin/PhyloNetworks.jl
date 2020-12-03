@@ -7,15 +7,15 @@ julia&gt; # read in trait data
 
 julia&gt; dat = DataFrame(trait=[&quot;hi&quot;,&quot;lo&quot;,&quot;lo&quot;,&quot;hi&quot;,&quot;lo&quot;,&quot;lo&quot;])
 6×1 DataFrame
-│ Row │ trait  │
-│     │ String │
-├─────┼────────┤
-│ 1   │ hi     │
-│ 2   │ lo     │
-│ 3   │ lo     │
-│ 4   │ hi     │
-│ 5   │ lo     │
-│ 6   │ lo     │</code></pre><p>If your species names and trait data are in the same data frame, read in your data frame then subset the data like this:</p><pre><code class="language-julia">dat = DataFrame(species=[&quot;C&quot;,&quot;A&quot;,&quot;D&quot;,&quot;B&quot;,&quot;O&quot;,&quot;E&quot;], trait=[&quot;hi&quot;,&quot;lo&quot;,&quot;lo&quot;,&quot;hi&quot;,&quot;lo&quot;,&quot;lo&quot;]);
+ Row │ trait
+     │ String
+─────┼────────
+   1 │ hi
+   2 │ lo
+   3 │ lo
+   4 │ hi
+   5 │ lo
+   6 │ lo</code></pre><p>If your species names and trait data are in the same data frame, read in your data frame then subset the data like this:</p><pre><code class="language-julia">dat = DataFrame(species=[&quot;C&quot;,&quot;A&quot;,&quot;D&quot;,&quot;B&quot;,&quot;O&quot;,&quot;E&quot;], trait=[&quot;hi&quot;,&quot;lo&quot;,&quot;lo&quot;,&quot;hi&quot;,&quot;lo&quot;,&quot;lo&quot;]);
 species = dat.species # or: dat[!, :species]
 select!(dat, Not(:species)) # select all columns except for :species; modifies dat in place</code></pre><p>Let&#39;s plot the network and map the data onto it:</p><pre><code class="language-julia">using RCall, PhyloPlots
 R&quot;par&quot;(mar=[0,0,0,0]); # to reduce margins
@@ -86,22 +86,22 @@ julia&gt; aic(s4)
 11.17404616987955</code></pre><p>Here, the equal-rate model is slightly favored (lower AIC), so we will use <code>s3</code> below.</p><h3 id="ancestral-state-prediction"><a class="docs-heading-anchor" href="#ancestral-state-prediction">ancestral state prediction</a><a id="ancestral-state-prediction-1"></a><a class="docs-heading-anchor-permalink" href="#ancestral-state-prediction" title="Permalink"></a></h3><p>This is traditionally called &quot;ancestral state reconstruction&quot;, but we do not actually reconstruct anything. We make predictions for (past of present-day) values, hopefully with some measure to quantify our uncertainty.</p><pre><code class="language-julia-repl">julia&gt; # show(ancestralStateReconstruction(s3), allrows=true)
        ancestralStateReconstruction(s3)
 13×4 DataFrame
-│ Row │ nodenumber │ nodelabel │ hi        │ lo       │
-│     │ Int64      │ String    │ Float64   │ Float64  │
-├─────┼────────────┼───────────┼───────────┼──────────┤
-│ 1   │ 1          │ O         │ 0.0       │ 1.0      │
-│ 2   │ 2          │ A         │ 0.0       │ 1.0      │
-│ 3   │ 3          │ B         │ 1.0       │ 0.0      │
-│ 4   │ 4          │ C         │ 1.0       │ 0.0      │
-│ 5   │ 5          │ D         │ 0.0       │ 1.0      │
-│ 6   │ 6          │ E         │ 0.0       │ 1.0      │
-│ 7   │ 7          │ 7         │ 0.497566  │ 0.502434 │
-│ 8   │ 8          │ 8         │ 0.497042  │ 0.502958 │
-│ 9   │ 9          │ 9         │ 0.517993  │ 0.482007 │
-│ 10  │ 10         │ 10        │ 0.476645  │ 0.523355 │
-│ 11  │ 11         │ 11        │ 0.0226845 │ 0.977316 │
-│ 12  │ 12         │ 12        │ 0.755186  │ 0.244814 │
-│ 13  │ 13         │ H1        │ 0.796886  │ 0.203114 │</code></pre><p>Rows 1-6 correspond to the tips, with known values. We see much prediction uncertainty at most of the internal nodes. To see where these internal nodes (7-13/H1) are, we need to look at the network stored within the fitted model. This network might differ somewhat from the input network in case taxa with missing data where pruned, and with edges possibly renumbered.</p><pre><code class="language-julia">plot(s3.net, :R, showNodeNumber=true, showIntNodeLabel=true, tipOffset=0.2);</code></pre><p><img src="../../assets/figures/fitdiscrete_trait_net_2.svg" alt="net_2"/></p><p>Looking back at the posterior probabilities of states &quot;hi&quot; and &quot;lo&quot; at each node from the ancestral &#39;prediction&#39; table above, we see that there is more uncertainty near the root, and less uncertainty near the tips. The most recent common ancestor of D and E (node 11), in particular, is predicted to be &quot;lo&quot; with fairly high certainty.</p><h3 id="impact-of-gene-flow-on-the-trait"><a class="docs-heading-anchor" href="#impact-of-gene-flow-on-the-trait">impact of gene flow on the trait</a><a id="impact-of-gene-flow-on-the-trait-1"></a><a class="docs-heading-anchor-permalink" href="#impact-of-gene-flow-on-the-trait" title="Permalink"></a></h3><p>An interesting question is whether there is evidence that B obtained it&#39;s &quot;hi&quot; state via gene flow. The prior probability for this is γ: the supposedly known proportion of genes inherited via gene flow, which is part of the network (along with branch lengths). Here, this prior probability of trait inheritance via gene flow is:</p><pre><code class="language-julia-repl">julia&gt; net.edge[6].gamma # the minor hybrid edge was edge 6, from above
+ Row │ nodenumber  nodelabel  hi         lo
+     │ Int64       String     Float64    Float64
+─────┼────────────────────────────────────────────
+   1 │          1  O          0.0        1.0
+   2 │          2  A          0.0        1.0
+   3 │          3  B          1.0        0.0
+   4 │          4  C          1.0        0.0
+   5 │          5  D          0.0        1.0
+   6 │          6  E          0.0        1.0
+   7 │          7  7          0.497566   0.502434
+   8 │          8  8          0.497042   0.502958
+   9 │          9  9          0.517993   0.482007
+  10 │         10  10         0.476645   0.523355
+  11 │         11  11         0.0226845  0.977316
+  12 │         12  12         0.755186   0.244814
+  13 │         13  H1         0.796886   0.203114</code></pre><p>Rows 1-6 correspond to the tips, with known values. We see much prediction uncertainty at most of the internal nodes. To see where these internal nodes (7-13/H1) are, we need to look at the network stored within the fitted model. This network might differ somewhat from the input network in case taxa with missing data where pruned, and with edges possibly renumbered.</p><pre><code class="language-julia">plot(s3.net, :R, showNodeNumber=true, showIntNodeLabel=true, tipOffset=0.2);</code></pre><p><img src="../../assets/figures/fitdiscrete_trait_net_2.svg" alt="net_2"/></p><p>Looking back at the posterior probabilities of states &quot;hi&quot; and &quot;lo&quot; at each node from the ancestral &#39;prediction&#39; table above, we see that there is more uncertainty near the root, and less uncertainty near the tips. The most recent common ancestor of D and E (node 11), in particular, is predicted to be &quot;lo&quot; with fairly high certainty.</p><h3 id="impact-of-gene-flow-on-the-trait"><a class="docs-heading-anchor" href="#impact-of-gene-flow-on-the-trait">impact of gene flow on the trait</a><a id="impact-of-gene-flow-on-the-trait-1"></a><a class="docs-heading-anchor-permalink" href="#impact-of-gene-flow-on-the-trait" title="Permalink"></a></h3><p>An interesting question is whether there is evidence that B obtained it&#39;s &quot;hi&quot; state via gene flow. The prior probability for this is γ: the supposedly known proportion of genes inherited via gene flow, which is part of the network (along with branch lengths). Here, this prior probability of trait inheritance via gene flow is:</p><pre><code class="language-julia-repl">julia&gt; net.edge[6].gamma # the minor hybrid edge was edge 6, from above
 0.08</code></pre><p>We can compare this to the posterior probability, and get a Bayes factor to compare the two hypotheses: gene flow vs. vertical inheritance.</p><pre><code class="language-julia-repl">julia&gt; exp(s3.priorltw[1]) # prior: for vertical inheritance. &quot;ltw&quot; = log tree weight
 0.92
 
@@ -177,4 +177,4 @@ julia&gt; m1.label[traitmatrix[:,12]]
 3-element Array{String,1}:
  &quot;carnivory&quot;
  &quot;carnivory&quot;
- &quot;carnivory&quot;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../parsimony/">« Parsimony on networks</a><a class="docs-footer-nextpage" href="../nj/">Neighbour Joining »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 2 December 2020 22:32">Wednesday 2 December 2020</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+ &quot;carnivory&quot;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../parsimony/">« Parsimony on networks</a><a class="docs-footer-nextpage" href="../nj/">Neighbour Joining »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 3 December 2020 06:28">Thursday 3 December 2020</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

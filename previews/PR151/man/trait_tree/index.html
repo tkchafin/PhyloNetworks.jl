@@ -11,15 +11,15 @@ R&quot;par&quot;(mar=[0,0,0,0])
 plot(truenet, :R, useEdgeLength=true, showGamma=true);
 R&quot;dev.off()&quot;</code></pre><p><img src="../../assets/figures/truenet.svg" alt="truenet"/></p><h2 id="Model-and-Variance-Matrix"><a class="docs-heading-anchor" href="#Model-and-Variance-Matrix">Model and Variance Matrix</a><a id="Model-and-Variance-Matrix-1"></a><a class="docs-heading-anchor-permalink" href="#Model-and-Variance-Matrix" title="Permalink"></a></h2><p>Assuming that the network is known and that the continuous traits evolve like a Brownian Motion (BM) in time, it is possible to compute the expected variance covariance matrix between tip measurements. This can be done using function <a href="../../lib/public/#PhyloNetworks.vcv"><code>vcv</code></a>, whose syntax is inspired from the well known corresponding <a href="https://CRAN.R-project.org/package=ape"><code>ape</code></a> function.</p><pre><code class="language-julia-repl">julia&gt; C = vcv(truenet)
 6×6 DataFrame
-│ Row │ D       │ C       │ A       │ B       │ E       │ O       │
-│     │ Float64 │ Float64 │ Float64 │ Float64 │ Float64 │ Float64 │
-├─────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
-│ 1   │ 11.2    │ 10.8    │ 4.8     │ 4.8     │ 2.0     │ 0.0     │
-│ 2   │ 10.8    │ 11.2    │ 4.8     │ 4.8     │ 2.0     │ 0.0     │
-│ 3   │ 4.8     │ 4.8     │ 8.596   │ 7.796   │ 3.86    │ 0.0     │
-│ 4   │ 4.8     │ 4.8     │ 7.796   │ 8.596   │ 3.86    │ 0.0     │
-│ 5   │ 2.0     │ 2.0     │ 3.86    │ 3.86    │ 11.2    │ 0.0     │
-│ 6   │ 0.0     │ 0.0     │ 0.0     │ 0.0     │ 0.0     │ 11.2    │</code></pre><p>The matrix is returned as a <code>DataFrame</code>, with columns named by the tips of the network to allow for easy identification. Each row also corresponds to a tip in the network, and rows are ordered in the same way as columns.</p><p>The computation of this matrix is based on the more general function <a href="../../lib/public/#PhyloNetworks.sharedPathMatrix"><code>sharedPathMatrix</code></a>. It is at the core of all the Phylogenetic Comparative Methods described below.</p><h2 id="Trait-simulation"><a class="docs-heading-anchor" href="#Trait-simulation">Trait simulation</a><a id="Trait-simulation-1"></a><a class="docs-heading-anchor-permalink" href="#Trait-simulation" title="Permalink"></a></h2><p>We start by generating continuous traits to study. We simulate three traits on the network (two independent, one dependent), using a Brownian Motion (BM) model of trait evolution on the network. We start by choosing the parameters of the BM (ancestral mean and variance), by creating objects of class <a href="../../lib/public/#PhyloNetworks.ParamsBM"><code>ParamsBM</code></a><code>&lt;:ParamsProcess</code>.</p><pre><code class="language-julia">params_trait1 = ParamsBM( 2, 0.5) # BM with mean  2 and variance 0.5
+ Row │ D        C        A        B        E        O
+     │ Float64  Float64  Float64  Float64  Float64  Float64
+─────┼──────────────────────────────────────────────────────
+   1 │    11.2     10.8    4.8      4.8       2.0       0.0
+   2 │    10.8     11.2    4.8      4.8       2.0       0.0
+   3 │     4.8      4.8    8.596    7.796     3.86      0.0
+   4 │     4.8      4.8    7.796    8.596     3.86      0.0
+   5 │     2.0      2.0    3.86     3.86     11.2       0.0
+   6 │     0.0      0.0    0.0      0.0       0.0      11.2</code></pre><p>The matrix is returned as a <code>DataFrame</code>, with columns named by the tips of the network to allow for easy identification. Each row also corresponds to a tip in the network, and rows are ordered in the same way as columns.</p><p>The computation of this matrix is based on the more general function <a href="../../lib/public/#PhyloNetworks.sharedPathMatrix"><code>sharedPathMatrix</code></a>. It is at the core of all the Phylogenetic Comparative Methods described below.</p><h2 id="Trait-simulation"><a class="docs-heading-anchor" href="#Trait-simulation">Trait simulation</a><a id="Trait-simulation-1"></a><a class="docs-heading-anchor-permalink" href="#Trait-simulation" title="Permalink"></a></h2><p>We start by generating continuous traits to study. We simulate three traits on the network (two independent, one dependent), using a Brownian Motion (BM) model of trait evolution on the network. We start by choosing the parameters of the BM (ancestral mean and variance), by creating objects of class <a href="../../lib/public/#PhyloNetworks.ParamsBM"><code>ParamsBM</code></a><code>&lt;:ParamsProcess</code>.</p><pre><code class="language-julia">params_trait1 = ParamsBM( 2, 0.5) # BM with mean  2 and variance 0.5
 params_trait2 = ParamsBM(-2, 1)   # BM with mean -2 and variance 1.0</code></pre><p>We then simulate the independent traits according to these parameters, using function <a href="../../lib/public/#PhyloNetworks.simulate"><code>simulate</code></a> (fixing the seed, for reproducibility).</p><pre><code class="language-julia">using Random
 Random.seed!(18480224);
 sim1 = simulate(truenet, params_trait1) # simulate a BM on truenet
@@ -31,15 +31,15 @@ trait3 = 10 .+ 2 * trait1 .+ noise[:Tips] # trait to study. independent of trait
 julia&gt; dat = DataFrame(trait1 = trait1, trait2 = trait2, trait3 = trait3,
                        tipNames = tipLabels(sim1))
 6×4 DataFrame
-│ Row │ trait1  │ trait2   │ trait3  │ tipNames │
-│     │ Float64 │ Float64  │ Float64 │ String   │
-├─────┼─────────┼──────────┼─────────┼──────────┤
-│ 1   │ 4.08298 │ -7.34186 │ 16.673  │ D        │
-│ 2   │ 3.10782 │ -7.45085 │ 15.0831 │ C        │
-│ 3   │ 2.17078 │ -3.32538 │ 14.4522 │ A        │
-│ 4   │ 1.87333 │ -4.26472 │ 13.9712 │ B        │
-│ 5   │ 2.8445  │ -5.96857 │ 16.417  │ E        │
-│ 6   │ 5.88204 │ -1.99388 │ 22.0269 │ O        │</code></pre><p>Phylogenetic regression / ANOVA is based on the <a href="https://github.com/JuliaStats/GLM.jl">GLM</a> package, with the network as an extra argument, using function <a href="../../lib/public/#PhyloNetworks.phyloNetworklm"><code>phyloNetworklm</code></a>.</p><pre><code class="language-julia-repl">julia&gt; using StatsModels # for statistical model formulas
+ Row │ trait1   trait2    trait3   tipNames
+     │ Float64  Float64   Float64  String
+─────┼──────────────────────────────────────
+   1 │ 4.08298  -7.34186  16.673   D
+   2 │ 3.10782  -7.45085  15.0831  C
+   3 │ 2.17078  -3.32538  14.4522  A
+   4 │ 1.87333  -4.26472  13.9712  B
+   5 │ 2.8445   -5.96857  16.417   E
+   6 │ 5.88204  -1.99388  22.0269  O</code></pre><p>Phylogenetic regression / ANOVA is based on the <a href="https://github.com/JuliaStats/GLM.jl">GLM</a> package, with the network as an extra argument, using function <a href="../../lib/public/#PhyloNetworks.phyloNetworklm"><code>phyloNetworklm</code></a>.</p><pre><code class="language-julia-repl">julia&gt; using StatsModels # for statistical model formulas
 
 julia&gt; fitTrait3 = phyloNetworklm(@formula(trait3 ~ trait1 + trait2), dat, truenet)
 StatsModels.TableRegressionModel{PhyloNetworkLinearModel,Array{Float64,2}}
@@ -66,22 +66,22 @@ AIC: 13.9703506922</code></pre><p>From this, we can see that the intercept, the 
 julia&gt; mu_estim(fitTrait3) # estimated root value of the BM
 11.956367929622933</code></pre><h2 id="Ancestral-State-Reconstruction"><a class="docs-heading-anchor" href="#Ancestral-State-Reconstruction">Ancestral State Reconstruction</a><a id="Ancestral-State-Reconstruction-1"></a><a class="docs-heading-anchor-permalink" href="#Ancestral-State-Reconstruction" title="Permalink"></a></h2><h3 id="From-known-parameters"><a class="docs-heading-anchor" href="#From-known-parameters">From known parameters</a><a id="From-known-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#From-known-parameters" title="Permalink"></a></h3><p>If we assume that we know the exact model of evolution that generated the traits, we can do ancestral trait reconstruction. Here, we simulated trait 1 ourselves, so we can use the true process, with the true parameters. In other words, we can reconstruct the state at the internal nodes, given the values at the tips, the known value at the root and the known BM variance.</p><pre><code class="language-julia">ancTrait1 = ancestralStateReconstruction(truenet, trait1, params_trait1)</code></pre><p>Function <a href="../../lib/public/#PhyloNetworks.ancestralStateReconstruction"><code>ancestralStateReconstruction</code></a> creates an object with type <a href="../../lib/public/#PhyloNetworks.ReconstructedStates"><code>ReconstructedStates</code></a>. Several extractors can be applied to it:</p><pre><code class="language-julia-repl">julia&gt; expectations(ancTrait1) # predictions
 13×2 DataFrame
-│ Row │ nodeNumber │ condExpectation │
-│     │ Int64      │ Float64         │
-├─────┼────────────┼─────────────────┤
-│ 1   │ -5         │ 3.55615         │
-│ 2   │ -7         │ 2.08473         │
-│ 3   │ 5          │ 2.42943         │
-│ 4   │ -4         │ 2.61415         │
-│ 5   │ -8         │ 2.56143         │
-│ 6   │ -3         │ 2.26785         │
-│ 7   │ -2         │ 2.0             │
-│ 8   │ 1          │ 4.08298         │
-│ 9   │ 2          │ 3.10782         │
-│ 10  │ 3          │ 2.17078         │
-│ 11  │ 4          │ 1.87333         │
-│ 12  │ 6          │ 2.8445          │
-│ 13  │ 7          │ 5.88204         │
+ Row │ nodeNumber  condExpectation
+     │ Int64       Float64
+─────┼─────────────────────────────
+   1 │         -5          3.55615
+   2 │         -7          2.08473
+   3 │          5          2.42943
+   4 │         -4          2.61415
+   5 │         -8          2.56143
+   6 │         -3          2.26785
+   7 │         -2          2.0
+   8 │          1          4.08298
+   9 │          2          3.10782
+  10 │          3          2.17078
+  11 │          4          1.87333
+  12 │          6          2.8445
+  13 │          7          5.88204
 
 julia&gt; using StatsBase # for stderror(), aic(), likelihood() etc.
 
@@ -115,16 +115,16 @@ plot(truenet,:R, nodeLabel = ancInt);</code></pre><p><img src="../../assets/figu
                                trueValue=sim1[:InternalNodes],
                                supPred=predint(ancTrait1)[1:7, 2])
 7×3 DataFrame
-│ Row │ infPred  │ trueValue │ supPred │
-│     │ Float64  │ Float64   │ Float64 │
-├─────┼──────────┼───────────┼─────────┤
-│ 1   │ 2.94398  │ 2.74233   │ 4.16832 │
-│ 2   │ 1.24207  │ 2.24355   │ 2.92738 │
-│ 3   │ 0.837628 │ 1.38334   │ 4.02123 │
-│ 4   │ 0.681629 │ 1.50076   │ 4.54666 │
-│ 5   │ 0.582023 │ 2.84188   │ 4.54084 │
-│ 6   │ 0.686076 │ 1.76745   │ 3.84962 │
-│ 7   │ 2.0      │ 2.0       │ 2.0     │</code></pre><h3 id="From-estimated-parameters"><a class="docs-heading-anchor" href="#From-estimated-parameters">From estimated parameters</a><a id="From-estimated-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#From-estimated-parameters" title="Permalink"></a></h3><p>In real applications though, we do not have access to the true parameters of the process that generated the data. We can estimate it using the previous function. To fit a regular BM, we just need to do a regression of trait 1 against a simple intercept:</p><pre><code class="language-julia">fitTrait1 = phyloNetworklm(@formula(trait1 ~ 1), dat, truenet)</code></pre><p>We can then apply the <a href="../../lib/public/#PhyloNetworks.ancestralStateReconstruction"><code>ancestralStateReconstruction</code></a> function directly to the fitted object:</p><pre><code class="language-julia">ancTrait1Approx = ancestralStateReconstruction(fitTrait1)</code></pre><pre class="documenter-example-output">┌ Warning: These prediction intervals show uncertainty in ancestral values,
+ Row │ infPred   trueValue  supPred
+     │ Float64   Float64    Float64
+─────┼──────────────────────────────
+   1 │ 2.94398     2.74233  4.16832
+   2 │ 1.24207     2.24355  2.92738
+   3 │ 0.837628    1.38334  4.02123
+   4 │ 0.681629    1.50076  4.54666
+   5 │ 0.582023    2.84188  4.54084
+   6 │ 0.686076    1.76745  3.84962
+   7 │ 2.0         2.0      2.0</code></pre><h3 id="From-estimated-parameters"><a class="docs-heading-anchor" href="#From-estimated-parameters">From estimated parameters</a><a id="From-estimated-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#From-estimated-parameters" title="Permalink"></a></h3><p>In real applications though, we do not have access to the true parameters of the process that generated the data. We can estimate it using the previous function. To fit a regular BM, we just need to do a regression of trait 1 against a simple intercept:</p><pre><code class="language-julia">fitTrait1 = phyloNetworklm(@formula(trait1 ~ 1), dat, truenet)</code></pre><p>We can then apply the <a href="../../lib/public/#PhyloNetworks.ancestralStateReconstruction"><code>ancestralStateReconstruction</code></a> function directly to the fitted object:</p><pre><code class="language-julia">ancTrait1Approx = ancestralStateReconstruction(fitTrait1)</code></pre><pre class="documenter-example-output">┌ Warning: These prediction intervals show uncertainty in ancestral values,
 │ assuming that the estimated variance rate of evolution is correct.
 │ Additional uncertainty in the estimation of this variance rate is
 │ ignored, so prediction intervals should be larger.
@@ -156,22 +156,20 @@ end</code></pre><pre><code class="language-julia-repl">julia&gt; trait3 # change
  19.45217792168757
  18.971151761117035
  16.41696746140128
- 22.026933970596104</code></pre><p>The categorical variable <code>underHyb</code> separates tips &quot;A&quot; and &quot;B&quot; from the others. We need to mark it as a categorical variable, not a numerical variable, i.e. as a <code>CategoricalArray</code>.</p><pre><code class="language-">dat = DataFrame(trait1 = trait1, trait2 = trait2, trait3 = trait3,
+ 22.026933970596104</code></pre><p>The categorical variable <code>underHyb</code> separates tips &quot;A&quot; and &quot;B&quot; from the others. We need to mark it as a categorical variable, not a numerical variable, i.e. as a <code>CategoricalArray</code>.</p><pre><code class="language-julia">dat = DataFrame(trait1 = trait1, trait2 = trait2, trait3 = trait3,
                 underHyb = underHyb,
                 tipNames = tipLabels(sim1))
-transform!(dat, :underHyb =&gt; categorical, renamecols=false)
-
-nothing # hide</code></pre><pre><code class="language-julia-repl">julia&gt; dat
+transform!(dat, :underHyb =&gt; categorical, renamecols=false)</code></pre><pre><code class="language-julia-repl">julia&gt; dat
 6×5 DataFrame
-│ Row │ trait1  │ trait2   │ trait3  │ underHyb │ tipNames │
-│     │ Float64 │ Float64  │ Float64 │ Bool     │ String   │
-├─────┼─────────┼──────────┼─────────┼──────────┼──────────┤
-│ 1   │ 4.08298 │ -7.34186 │ 16.673  │ 0        │ D        │
-│ 2   │ 3.10782 │ -7.45085 │ 15.0831 │ 0        │ C        │
-│ 3   │ 2.17078 │ -3.32538 │ 19.4522 │ 1        │ A        │
-│ 4   │ 1.87333 │ -4.26472 │ 18.9712 │ 1        │ B        │
-│ 5   │ 2.8445  │ -5.96857 │ 16.417  │ 0        │ E        │
-│ 6   │ 5.88204 │ -1.99388 │ 22.0269 │ 0        │ O        │</code></pre><p>Now we can include this reticulation variable in the regression.</p><pre><code class="language-julia">fitTrait = phyloNetworklm(@formula(trait3 ~ trait1 + underHyb), dat, truenet)</code></pre><pre class="documenter-example-output">StatsModels.TableRegressionModel{PhyloNetworkLinearModel,Array{Float64,2}}
+ Row │ trait1   trait2    trait3   underHyb  tipNames
+     │ Float64  Float64   Float64  Cat…      String
+─────┼────────────────────────────────────────────────
+   1 │ 4.08298  -7.34186  16.673   false     D
+   2 │ 3.10782  -7.45085  15.0831  false     C
+   3 │ 2.17078  -3.32538  19.4522  true      A
+   4 │ 1.87333  -4.26472  18.9712  true      B
+   5 │ 2.8445   -5.96857  16.417   false     E
+   6 │ 5.88204  -1.99388  22.0269  false     O</code></pre><p>Now we can include this reticulation variable in the regression.</p><pre><code class="language-julia">fitTrait = phyloNetworklm(@formula(trait3 ~ trait1 + underHyb), dat, truenet)</code></pre><pre class="documenter-example-output">StatsModels.TableRegressionModel{PhyloNetworkLinearModel,Array{Float64,2}}
 
 Formula: trait3 ~ 1 + trait1 + underHyb
 
@@ -181,13 +179,13 @@ Parameter(s) Estimates:
 Sigma2: 0.0484988
 
 Coefficients:
-───────────────────────────────────────────────────────────────────────
-                Coef.  Std. Error     t  Pr(&gt;|t|)  Lower 95%  Upper 95%
-───────────────────────────────────────────────────────────────────────
-(Intercept)  11.0616     1.19414   9.26    0.0027   7.2613     14.8619
-trait1        1.72504    0.240787  7.16    0.0056   0.958748    2.49133
-underHyb      5.07354    0.837326  6.06    0.0090   2.4088      7.73829
-───────────────────────────────────────────────────────────────────────
+──────────────────────────────────────────────────────────────────────────
+                   Coef.  Std. Error     t  Pr(&gt;|t|)  Lower 95%  Upper 95%
+──────────────────────────────────────────────────────────────────────────
+(Intercept)     11.0616     1.19414   9.26    0.0027   7.2613     14.8619
+trait1           1.72504    0.240787  7.16    0.0056   0.958748    2.49133
+underHyb: true   5.07354    0.837326  6.06    0.0090   2.4088      7.73829
+──────────────────────────────────────────────────────────────────────────
 Log Likelihood: -3.9885372687
 AIC: 15.9770745374
 </pre><p>In this case, the categorical variable indicating which tips are descendants of the reticulation event is indeed relevant, and the transgressive evolution effect is recovered.</p><p>This is a very simple example of how to include transgressive evolution, but some general functions to test for it, on networks with more than on hybrid, are also available.</p><h2 id="Pagel&#39;s-Lambda"><a class="docs-heading-anchor" href="#Pagel&#39;s-Lambda">Pagel&#39;s Lambda</a><a id="Pagel&#39;s-Lambda-1"></a><a class="docs-heading-anchor-permalink" href="#Pagel&#39;s-Lambda" title="Permalink"></a></h2><p>One classical question about trait evolution is the amount of &quot;phylogenetic signal&quot; in a dataset, that is, the importance of the tree structure to explain variation in the observed traits. One way of doing measuring that is to use Pagel&#39;s lambda transformation of the branch lengths <sup class="footnote-reference"><a id="citeref-P99" href="#footnote-P99">[P99]</a></sup>. This model assumes a BM on a tree where the internal branches are multiplied by a factor λ, while the external branches are modified so that the total height of the tree is constant. Hence, λ varies between 0 (the tree has no influence on the data) and 1 (the tree is unchanged). Using the same branch length transformations, this model can be straightforwardly extended to phylogenetic networks.</p><p>We can illustrate this with the predictor trait we used earlier. We use the same function as before, only indicating the model we want to use:</p><pre><code class="language-julia">fitPagel = phyloNetworklm(@formula(trait1 ~ 1), dat, truenet, model=&quot;lambda&quot;)</code></pre><pre class="documenter-example-output">StatsModels.TableRegressionModel{PhyloNetworkLinearModel,Array{Float64,2}}
@@ -244,4 +242,4 @@ ftest(fit_sh, fit_null)                                      # nested models, fr
 ─────────────────────────────────────────────────────────────────
 [1]    3        2.0874           0.6994                          
 [2]    2    -1  8.6247  6.5373  -0.2419  -0.9413  12.5272  0.0240
-─────────────────────────────────────────────────────────────────</pre><p>Here, this test is equivalent to the Fisher F test, and gives the same p-value.</p><p>Note that, for conventional reasons, the <code>ftest</code> function always takes the <em>most complex</em> model as the first one. This means that, in the table of results, the models are actually named in a reverse order, so that &quot;Model 2&quot; is actually our model under H₀ (null model), and &quot;Model 1&quot; the one under H₁ (model with shifts).</p><hr/><h3 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h3><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-B18"><a class="tag is-link" href="#citeref-B18">B18</a>Bastide, Solís-Lemus, Kriebel, Sparks, Ané (2018): Phylogenetic Comparative Methods for Phylogenetic Networks with Reticulations. Systematic Biology 67(5):800–820. doi:10.1093/sysbio/syy033</li><li class="footnote" id="footnote-P99"><a class="tag is-link" href="#citeref-P99">P99</a>Pagel M (1999). Inferring the historical patterns of biological evolution. Nature. 401: 877–884. doi:10.1038/44766</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../multiplealleles/">« Multiple Alleles</a><a class="docs-footer-nextpage" href="../parsimony/">Parsimony on networks »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 2 December 2020 22:32">Wednesday 2 December 2020</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+─────────────────────────────────────────────────────────────────</pre><p>Here, this test is equivalent to the Fisher F test, and gives the same p-value.</p><p>Note that, for conventional reasons, the <code>ftest</code> function always takes the <em>most complex</em> model as the first one. This means that, in the table of results, the models are actually named in a reverse order, so that &quot;Model 2&quot; is actually our model under H₀ (null model), and &quot;Model 1&quot; the one under H₁ (model with shifts).</p><hr/><h3 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h3><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-B18"><a class="tag is-link" href="#citeref-B18">B18</a>Bastide, Solís-Lemus, Kriebel, Sparks, Ané (2018): Phylogenetic Comparative Methods for Phylogenetic Networks with Reticulations. Systematic Biology 67(5):800–820. doi:10.1093/sysbio/syy033</li><li class="footnote" id="footnote-P99"><a class="tag is-link" href="#citeref-P99">P99</a>Pagel M (1999). Inferring the historical patterns of biological evolution. Nature. 401: 877–884. doi:10.1038/44766</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../multiplealleles/">« Multiple Alleles</a><a class="docs-footer-nextpage" href="../parsimony/">Parsimony on networks »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 3 December 2020 06:28">Thursday 3 December 2020</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

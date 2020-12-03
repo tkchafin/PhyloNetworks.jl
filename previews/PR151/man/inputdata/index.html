@@ -15,25 +15,25 @@ Reading in trees, looking at 15 quartets in each...
   ******************************
 
 julia&gt; df = writeTableCF(q,t)   # data frame with observed CFs: gene frequencies
-15×8 DataFrame. Omitted printing of 1 columns
-│ Row │ t1     │ t2     │ t3     │ t4     │ CF12_34  │ CF13_24   │ CF14_23   │
-│     │ String │ String │ String │ String │ Float64  │ Float64   │ Float64   │
-├─────┼────────┼────────┼────────┼────────┼──────────┼───────────┼───────────┤
-│ 1   │ A      │ B      │ C      │ D      │ 1.0      │ 0.0       │ 0.0       │
-│ 2   │ A      │ B      │ C      │ E      │ 0.833333 │ 0.0333333 │ 0.133333  │
-│ 3   │ A      │ B      │ D      │ E      │ 0.833333 │ 0.0333333 │ 0.133333  │
-│ 4   │ A      │ C      │ D      │ E      │ 0.0      │ 0.0       │ 1.0       │
-│ 5   │ B      │ C      │ D      │ E      │ 0.0      │ 0.0       │ 1.0       │
-│ 6   │ A      │ B      │ C      │ O      │ 0.866667 │ 0.0       │ 0.133333  │
-│ 7   │ A      │ B      │ D      │ O      │ 0.866667 │ 0.0       │ 0.133333  │
-│ 8   │ A      │ C      │ D      │ O      │ 0.0      │ 0.0       │ 1.0       │
-│ 9   │ B      │ C      │ D      │ O      │ 0.0      │ 0.0       │ 1.0       │
-│ 10  │ A      │ B      │ E      │ O      │ 0.833333 │ 0.0666667 │ 0.1       │
-│ 11  │ A      │ C      │ E      │ O      │ 0.533333 │ 0.333333  │ 0.133333  │
-│ 12  │ B      │ C      │ E      │ O      │ 0.666667 │ 0.266667  │ 0.0666667 │
-│ 13  │ A      │ D      │ E      │ O      │ 0.533333 │ 0.333333  │ 0.133333  │
-│ 14  │ B      │ D      │ E      │ O      │ 0.666667 │ 0.266667  │ 0.0666667 │
-│ 15  │ C      │ D      │ E      │ O      │ 1.0      │ 0.0       │ 0.0       │
+15×8 DataFrame
+ Row │ t1      t2      t3      t4      CF12_34   CF13_24    CF14_23    ngenes  ⋯
+     │ String  String  String  String  Float64   Float64    Float64    Float64 ⋯
+─────┼──────────────────────────────────────────────────────────────────────────
+   1 │ A       B       C       D       1.0       0.0        0.0           30.0 ⋯
+   2 │ A       B       C       E       0.833333  0.0333333  0.133333      30.0
+   3 │ A       B       D       E       0.833333  0.0333333  0.133333      30.0
+   4 │ A       C       D       E       0.0       0.0        1.0           30.0
+   5 │ B       C       D       E       0.0       0.0        1.0           30.0 ⋯
+   6 │ A       B       C       O       0.866667  0.0        0.133333      30.0
+   7 │ A       B       D       O       0.866667  0.0        0.133333      30.0
+   8 │ A       C       D       O       0.0       0.0        1.0           30.0
+   9 │ B       C       D       O       0.0       0.0        1.0           30.0 ⋯
+  10 │ A       B       E       O       0.833333  0.0666667  0.1           30.0
+  11 │ A       C       E       O       0.533333  0.333333   0.133333      30.0
+  12 │ B       C       E       O       0.666667  0.266667   0.0666667     30.0
+  13 │ A       D       E       O       0.533333  0.333333   0.133333      30.0 ⋯
+  14 │ B       D       E       O       0.666667  0.266667   0.0666667     30.0
+  15 │ C       D       E       O       1.0       0.0        0.0           30.0
 
 julia&gt; using CSV
 
@@ -52,16 +52,17 @@ number of quartets: 15</code></pre><p>The same thing could be done in 2 steps: f
 julia&gt; dat = DataFrame(CSV.File(buckyCFfile); copycols=false);
 
 julia&gt; first(dat, 6) # to see the first 6 rows
-6×14 DataFrame. Omitted printing of 8 columns
-│ Row │ taxon1 │ taxon2 │ taxon3 │ taxon4 │ CF12.34    │ CF12.34_lo │
-│     │ String │ String │ String │ String │ Float64    │ Float64    │
-├─────┼────────┼────────┼────────┼────────┼────────────┼────────────┤
-│ 1   │ D      │ A      │ E      │ O      │ 0.565033   │ 0.5        │
-│ 2   │ D      │ A      │ E      │ B      │ 0.0005     │ 0.0        │
-│ 3   │ C      │ A      │ E      │ B      │ 0.0005     │ 0.0        │
-│ 4   │ C      │ A      │ E      │ O      │ 0.565033   │ 0.5        │
-│ 5   │ D      │ A      │ O      │ B      │ 3.33333e-5 │ 0.0        │
-│ 6   │ C      │ D      │ E      │ O      │ 0.999867   │ 1.0        │
+6×14 DataFrame
+ Row │ taxon1  taxon2  taxon3  taxon4  CF12.34     CF12.34_lo  CF12.34_hi  CF1 ⋯
+     │ String  String  String  String  Float64     Float64     Float64     Flo ⋯
+─────┼──────────────────────────────────────────────────────────────────────────
+   1 │ D       A       E       O       0.565033           0.5    0.633333  0.0 ⋯
+   2 │ D       A       E       B       0.0005             0.0    0.0       0.8
+   3 │ C       A       E       B       0.0005             0.0    0.0       0.8
+   4 │ C       A       E       O       0.565033           0.5    0.633333  0.0
+   5 │ D       A       O       B       3.33333e-5         0.0    0.0       0.8 ⋯
+   6 │ C       D       E       O       0.999867           1.0    1.0       6.6
+                                                               7 columns omitted
 
 julia&gt; buckyCF = readTableCF(dat)
 30.0 gene trees per 4-taxon set
@@ -69,24 +70,25 @@ Object DataCF
 number of quartets: 15
 
 julia&gt; writeTableCF(buckyCF)
-15×8 DataFrame. Omitted printing of 2 columns
-│ Row │ t1     │ t2     │ t3     │ t4     │ CF12_34    │ CF13_24    │
-│     │ String │ String │ String │ String │ Float64    │ Float64    │
-├─────┼────────┼────────┼────────┼────────┼────────────┼────────────┤
-│ 1   │ D      │ A      │ E      │ O      │ 0.565033   │ 0.0903     │
-│ 2   │ D      │ A      │ E      │ B      │ 0.0005     │ 0.8599     │
-│ 3   │ C      │ A      │ E      │ B      │ 0.0005     │ 0.8599     │
-│ 4   │ C      │ A      │ E      │ O      │ 0.565033   │ 0.0903     │
-│ 5   │ D      │ A      │ O      │ B      │ 3.33333e-5 │ 0.8885     │
-│ 6   │ C      │ D      │ E      │ O      │ 0.999867   │ 6.66667e-5 │
-│ 7   │ C      │ E      │ O      │ B      │ 0.0401667  │ 0.263067   │
-│ 8   │ C      │ D      │ A      │ E      │ 1.0        │ 0.0        │
-│ 9   │ C      │ D      │ O      │ B      │ 0.999867   │ 6.66667e-5 │
-│ 10  │ C      │ D      │ E      │ B      │ 1.0        │ 0.0        │
-│ 11  │ D      │ E      │ O      │ B      │ 0.0401667  │ 0.263067   │
-│ 12  │ C      │ D      │ A      │ O      │ 0.999867   │ 6.66667e-5 │
-│ 13  │ C      │ D      │ A      │ B      │ 1.0        │ 0.0        │
-│ 14  │ A      │ E      │ O      │ B      │ 0.0731667  │ 0.0424667  │
-│ 15  │ C      │ A      │ O      │ B      │ 3.33333e-5 │ 0.8885     │</code></pre><p>In the input file, columns need to be in the right order: with the first 4 columns giving the names of the taxa in each 4-taxon set. The CF values are assumed to be in columns named &quot;CF12_34&quot;, etc., or else in columns 5,6,7. If available, a column named &quot;ngenes&quot; will be taken to have the the number of genes for each 4-taxon subset.</p><h2 id="Tutorial-data:-starting-tree"><a class="docs-heading-anchor" href="#Tutorial-data:-starting-tree">Tutorial data: starting tree</a><a id="Tutorial-data:-starting-tree-1"></a><a class="docs-heading-anchor-permalink" href="#Tutorial-data:-starting-tree" title="Permalink"></a></h2><p>If we have a tree for the data set at hand, it can be used as a starting point for the optimization. From our gene trees, we estimated a species tree with <a href="https://github.com/smirarab/ASTRAL/blob/master/astral-tutorial.md">ASTRAL</a>. This tree comes with the package in file <code>astral.tre</code> <a href="https://github.com/crsl4/PhyloNetworks/blob/master/examples/astral.tre">here</a>. This file has 102 trees: 100 bootstrap species trees, followed by their greedy consensus, followed by the best tree on the original data. It&#39;s this last tree that we are most interested in. We can read it with</p><pre><code class="language-julia">astralfile = joinpath(dirname(pathof(PhyloNetworks)), &quot;..&quot;,&quot;examples&quot;,&quot;astral.tre&quot;);
+15×8 DataFrame
+ Row │ t1      t2      t3      t4      CF12_34     CF13_24     CF14_23     nge ⋯
+     │ String  String  String  String  Float64     Float64     Float64     Flo ⋯
+─────┼──────────────────────────────────────────────────────────────────────────
+   1 │ D       A       E       O       0.565033    0.0903      0.344667        ⋯
+   2 │ D       A       E       B       0.0005      0.8599      0.139567
+   3 │ C       A       E       B       0.0005      0.8599      0.139567
+   4 │ C       A       E       O       0.565033    0.0903      0.344667
+   5 │ D       A       O       B       3.33333e-5  0.8885      0.111467        ⋯
+   6 │ C       D       E       O       0.999867    6.66667e-5  6.66667e-5
+   7 │ C       E       O       B       0.0401667   0.263067    0.696767
+   8 │ C       D       A       E       1.0         0.0         0.0
+   9 │ C       D       O       B       0.999867    6.66667e-5  6.66667e-5      ⋯
+  10 │ C       D       E       B       1.0         0.0         0.0
+  11 │ D       E       O       B       0.0401667   0.263067    0.696767
+  12 │ C       D       A       O       0.999867    6.66667e-5  6.66667e-5
+  13 │ C       D       A       B       1.0         0.0         0.0             ⋯
+  14 │ A       E       O       B       0.0731667   0.0424667   0.884367
+  15 │ C       A       O       B       3.33333e-5  0.8885      0.111467
+                                                                1 column omitted</code></pre><p>In the input file, columns need to be in the right order: with the first 4 columns giving the names of the taxa in each 4-taxon set. The CF values are assumed to be in columns named &quot;CF12_34&quot;, etc., or else in columns 5,6,7. If available, a column named &quot;ngenes&quot; will be taken to have the the number of genes for each 4-taxon subset.</p><h2 id="Tutorial-data:-starting-tree"><a class="docs-heading-anchor" href="#Tutorial-data:-starting-tree">Tutorial data: starting tree</a><a id="Tutorial-data:-starting-tree-1"></a><a class="docs-heading-anchor-permalink" href="#Tutorial-data:-starting-tree" title="Permalink"></a></h2><p>If we have a tree for the data set at hand, it can be used as a starting point for the optimization. From our gene trees, we estimated a species tree with <a href="https://github.com/smirarab/ASTRAL/blob/master/astral-tutorial.md">ASTRAL</a>. This tree comes with the package in file <code>astral.tre</code> <a href="https://github.com/crsl4/PhyloNetworks/blob/master/examples/astral.tre">here</a>. This file has 102 trees: 100 bootstrap species trees, followed by their greedy consensus, followed by the best tree on the original data. It&#39;s this last tree that we are most interested in. We can read it with</p><pre><code class="language-julia">astralfile = joinpath(dirname(pathof(PhyloNetworks)), &quot;..&quot;,&quot;examples&quot;,&quot;astral.tre&quot;);
 astraltree = readMultiTopology(astralfile)[102] # 102th tree: last tree here
-plot(astraltree, :R, showEdgeLength=true);</code></pre><p><img src="../../assets/figures/inputdata_astraltree.svg" alt="astraltree"/></p><p>To start its search, SNaQ will need a network of &quot;level 1&quot;. All trees and all networks with 1 hybridization are of level 1. To make sure that a network with 2 or more hybridizations is of level 1, we can read it in with <code>readTopologyLevel1</code> (which also unroots the tree, resolves polytomies, replaces missing branch lengths by 1 for starting values etc.):</p><pre><code class="language-julia">T=readTopologyLevel1(&quot;startNetwork.txt&quot;)</code></pre><p>(here <code>startNetwork.txt</code> is a hypothetical file: replace this by the name of a file that contains your network of interest.)</p><p>Next: <a href="../snaq_plot/#Getting-a-Network">Getting a Network</a></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../ticr_howtogetQuartetCFs/">TICR pipeline »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 2 December 2020 22:32">Wednesday 2 December 2020</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot(astraltree, :R, showEdgeLength=true);</code></pre><p><img src="../../assets/figures/inputdata_astraltree.svg" alt="astraltree"/></p><p>To start its search, SNaQ will need a network of &quot;level 1&quot;. All trees and all networks with 1 hybridization are of level 1. To make sure that a network with 2 or more hybridizations is of level 1, we can read it in with <code>readTopologyLevel1</code> (which also unroots the tree, resolves polytomies, replaces missing branch lengths by 1 for starting values etc.):</p><pre><code class="language-julia">T=readTopologyLevel1(&quot;startNetwork.txt&quot;)</code></pre><p>(here <code>startNetwork.txt</code> is a hypothetical file: replace this by the name of a file that contains your network of interest.)</p><p>Next: <a href="../snaq_plot/#Getting-a-Network">Getting a Network</a></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../ticr_howtogetQuartetCFs/">TICR pipeline »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 3 December 2020 06:28">Thursday 3 December 2020</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
