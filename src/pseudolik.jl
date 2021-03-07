@@ -1385,6 +1385,13 @@ function logPseudoLik(quartet::Array{Quartet,1})
     end
     return -suma
 end
+function logPseudoLik(quartet::CuArray{Quartet,1})
+    suma = 0
+    Threads.@threads for q in quartet
+        suma += logPseudoLik(q)
+    end
+    return -suma
+end
 
 logPseudoLik(d::DataCF) = logPseudoLik(d.quartet)
 
