@@ -15,6 +15,7 @@ module PhyloNetworks
 
     #tkc experimenting 
     using Base.Threads
+    using CuArrays
 
     # other libraries, indicate compatible version in Project.toml
     using BioSequences
