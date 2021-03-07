@@ -1205,7 +1205,7 @@ function optTopLevel!(currT::HybridNetwork, liktolAbs::Float64, Nfail::Integer, 
                       ftolRel::Float64, ftolAbs::Float64, xtolRel::Float64, xtolAbs::Float64,
                       verbose::Bool, closeN ::Bool, Nmov0::Vector{Int}, logfile::IO, writelog::Bool)
 
-    d.quartets = cu(d.quartets)
+    d.quartet = cu(d.quartet)
 
     global CHECKNET
     @debug "OPT: begins optTopLevel with hmax $(hmax)"
